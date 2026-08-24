@@ -1,0 +1,10 @@
+{
+  "Name": "SecondView",
+  "Author": "you",
+  "Version": "0.1.0",
+  "Description": "Renders a second camera on the player into a separate window, for vertical stream capture.",
+  "UniqueID": "you.SecondView",
+  "EntryDll": "SecondView.dll",
+  "MinimumApiVersion": "4.0.0",
+  "UpdateKeys": []
+}
