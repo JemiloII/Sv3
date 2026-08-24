@@ -1,4 +1,4 @@
-# Sv³ — Stardew Valley Second View
+# Sv³ — Stardew Valley Vertical View
 
 SMAPI mod for Stardew Valley 1.6 that renders a second, vertical camera view of the player into a separate window — made for capturing a portrait feed (phone-format stream) alongside normal gameplay.
 
@@ -17,7 +17,7 @@ The mirror window is display-only: it takes no input, never blocks the game thre
 2. Build with `dotnet build -c Release` (auto-deploys to your game's `Mods` folder), or drop a release zip into `Mods/`.
 3. Launch via SMAPI. The second window appears at the title screen and starts rendering once you're in a save.
 
-## Config (`Mods/SecondView/config.json`)
+## Config (`Mods/VerticalView/config.json`)
 
 | Key | Default | Meaning |
 | --- | --- | --- |
@@ -33,4 +33,4 @@ Edit the config and restart the game — no rebuild needed.
 
 ## OBS
 
-Capture the window `Stardew Valley - Second View` with Window Capture. The window can be ignored/minimized-behind — it keeps rendering.
+Capture the window `Stardew Valley Vertical View` with Window Capture. The window can be ignored/minimized-behind — it keeps rendering.

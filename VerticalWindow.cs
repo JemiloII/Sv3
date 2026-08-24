@@ -2,13 +2,13 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace SecondView;
+namespace VerticalView;
 
 /// <summary>Presents the game's render target texture into a second SDL window via a shared
 /// OpenGL context and a GPU-to-GPU framebuffer blit. Pixels never touch the CPU, and all
 /// GL work for this window happens on a background thread; the game thread only sets an
 /// integer and signals.</summary>
-internal sealed class SecondWindow : IDisposable
+internal sealed class VerticalWindow : IDisposable
 {
     private const uint GlReadFramebuffer = 0x8CA8;
     private const uint GlDrawFramebuffer = 0x8CA9;
@@ -33,7 +33,7 @@ internal sealed class SecondWindow : IDisposable
     private volatile bool disposed;
 
     /// <summary>Must be called on the game thread, with the game's GL context current, so the new context shares its textures.</summary>
-    public SecondWindow(string title, int windowWidth, int windowHeight, int textureWidth, int textureHeight, int x, int y, Action<string> onError)
+    public VerticalWindow(string title, int windowWidth, int windowHeight, int textureWidth, int textureHeight, int x, int y, Action<string> onError)
     {
         this.textureWidth = textureWidth;
         this.textureHeight = textureHeight;
@@ -61,7 +61,7 @@ internal sealed class SecondWindow : IDisposable
             Sdl.DestroyWindow(window);
             throw new InvalidOperationException("SDL_GL_CreateContext: " + Sdl.GetError());
         }
-        thread = new Thread(PresentLoop) { IsBackground = true, Name = "SecondView present" };
+        thread = new Thread(PresentLoop) { IsBackground = true, Name = "VerticalView present" };
         thread.Start();
     }
 
@@ -124,7 +124,7 @@ internal sealed class SecondWindow : IDisposable
         }
         catch (Exception exception)
         {
-            onError("second window present thread died: " + exception);
+            onError("vertical window present thread died: " + exception);
         }
     }
 

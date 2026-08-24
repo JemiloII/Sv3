@@ -1,4 +1,4 @@
-namespace SecondView;
+namespace VerticalView;
 
 public sealed class ModConfig
 {

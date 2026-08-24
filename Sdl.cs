@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace SecondView;
+namespace VerticalView;
 
 internal static class Sdl
 {

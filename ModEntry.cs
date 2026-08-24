@@ -8,7 +8,7 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
 
-namespace SecondView;
+namespace VerticalView;
 
 public sealed class ModEntry : Mod
 {
@@ -28,7 +28,7 @@ public sealed class ModEntry : Mod
     private static int hudLift;
 
     private ModConfig config = new ModConfig();
-    private SecondWindow? window;
+    private VerticalWindow? window;
     private readonly RenderTarget2D?[] targets = new RenderTarget2D?[2];
     private int flip;
     private RenderTarget2D? uiTarget;
@@ -93,8 +93,8 @@ public sealed class ModEntry : Mod
             // dialogue boxes are a fixed 1240 UI pixels wide; shrink the UI while one is open so it fits
             dialogueUiScale = Math.Min(config.UiScale, renderWidth / 1280f);
             hudLift = config.HudLift;
-            window = new SecondWindow(
-                "Stardew Valley - Second View",
+            window = new VerticalWindow(
+                "Stardew Valley Vertical View",
                 config.WindowWidth, config.WindowHeight,
                 renderWidth, renderHeight,
                 config.WindowX, config.WindowY,
@@ -114,7 +114,7 @@ public sealed class ModEntry : Mod
         }
         catch (Exception exception)
         {
-            Monitor.Log("Second window failed: " + exception, LogLevel.Error);
+            Monitor.Log("Vertical window failed: " + exception, LogLevel.Error);
             window = null;
         }
     }
@@ -374,7 +374,7 @@ public sealed class ModEntry : Mod
         }
         catch (Exception exception)
         {
-            Monitor.Log("Second view render failed, disabling: " + exception, LogLevel.Error);
+            Monitor.Log("Vertical view render failed, disabling: " + exception, LogLevel.Error);
             window.Dispose();
             window = null;
         }

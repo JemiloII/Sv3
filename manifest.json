@@ -1,10 +1,10 @@
 {
-  "Name": "SecondView",
-  "Author": "you",
+  "Name": "Vertical View",
+  "Author": "JemiloII",
   "Version": "0.1.0",
-  "Description": "Renders a second camera on the player into a separate window, for vertical stream capture.",
-  "UniqueID": "you.SecondView",
-  "EntryDll": "SecondView.dll",
+  "Description": "Renders a vertical camera view of the player into a separate window, for portrait stream capture.",
+  "UniqueID": "JemiloII.VerticalView",
+  "EntryDll": "VerticalView.dll",
   "MinimumApiVersion": "4.0.0",
   "UpdateKeys": []
 }
