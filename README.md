@@ -1,4 +1,4 @@
-# SecondView
+# Sv3 — Stardew Valley Second View
 
 SMAPI mod for Stardew Valley 1.6 that renders a second, vertical camera view of the player into a separate window — made for capturing a portrait feed (phone-format stream) alongside normal gameplay.
 
