@@ -15,7 +15,14 @@ The mirror window is display-only: it takes no input, never blocks the game thre
 
 1. Install [SMAPI](https://smapi.io).
 2. Build with `dotnet build -c Release` (auto-deploys to your game's `Mods` folder), or drop a release zip into `Mods/`.
-3. Launch via SMAPI. The second window appears at the title screen and starts rendering once you're in a save.
+3. Launch via SMAPI — mods don't load through the plain game exe. Either run `StardewModdingAPI.exe` from the game folder, or (recommended for Steam) right-click the game → Properties → Launch Options and set:
+
+   ```
+   "C:\Program Files (x86)\Steam\steamapps\common\Stardew Valley\StardewModdingAPI.exe" %command%
+   ```
+
+   (`%command%` is a Steam placeholder for the original launch command — type the line literally, adjusting the path to your install.) Then launch from Steam as usual; you keep the overlay and playtime tracking.
+4. The vertical window appears at the title screen and starts rendering once you're in a save.
 
 ## Config (`Mods/VerticalView/config.json`)
 
