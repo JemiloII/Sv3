@@ -221,10 +221,10 @@ public sealed class ModEntry : Mod
         Rectangle source;
         if (menu is GameMenu gameMenu && gameMenu.currentTab < gameMenu.pages.Count && gameMenu.pages[gameMenu.currentTab] is MapPage mapPage)
         {
-            // the world map reports bogus menu bounds, but tracks its real pixel area; small pad for the
-            // frame border, extra below for the location-name scroll
+            // the world map reports bogus menu bounds, but tracks its real position; its stored size is
+            // quarter-scale (GetMapPixelBounds divides by 4). Pad for the frame border + location scroll.
             Rectangle map = mapPage.mapBounds;
-            source = new Rectangle(map.X - 32, map.Y - 32, map.Width + 64, map.Height + 144);
+            source = new Rectangle(map.X - 32, map.Y - 32, map.Width * 4 + 64, map.Height * 4 + 144);
         }
         else
         {
