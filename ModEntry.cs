@@ -218,16 +218,25 @@ public sealed class ModEntry : Mod
             Game1.options.showClearBackgrounds = oldClearBackgrounds;
         }
         // the active page (e.g. the map) can be larger than the menu frame; include both
-        Rectangle box = new Rectangle(menu.xPositionOnScreen, menu.yPositionOnScreen, menu.width, menu.height);
-        if (menu is GameMenu gameMenu && gameMenu.currentTab < gameMenu.pages.Count)
+        Rectangle source;
+        if (menu is GameMenu gameMenu && gameMenu.currentTab < gameMenu.pages.Count && gameMenu.pages[gameMenu.currentTab] is MapPage mapPage)
         {
-            IClickableMenu page = gameMenu.pages[gameMenu.currentTab];
-            box = page is MapPage
-                ? new Rectangle(0, 0, mainBounds.Width, mainBounds.Height) // the 1.6 world map draws far beyond its reported bounds
-                : Rectangle.Union(box, new Rectangle(page.xPositionOnScreen, page.yPositionOnScreen, page.width, page.height));
+            // the world map reports bogus menu bounds, but tracks its real pixel area; small pad for the
+            // frame border, extra below for the location-name scroll
+            Rectangle map = mapPage.mapBounds;
+            source = new Rectangle(map.X - 32, map.Y - 32, map.Width + 64, map.Height + 144);
         }
-        // menus draw tabs/buttons/titles outside their box; pad generously, then clamp to the layout
-        Rectangle source = new Rectangle(box.X - 160, box.Y - 128, box.Width + 352, box.Height + 256);
+        else
+        {
+            Rectangle box = new Rectangle(menu.xPositionOnScreen, menu.yPositionOnScreen, menu.width, menu.height);
+            if (menu is GameMenu tabbed && tabbed.currentTab < tabbed.pages.Count)
+            {
+                IClickableMenu page = tabbed.pages[tabbed.currentTab];
+                box = Rectangle.Union(box, new Rectangle(page.xPositionOnScreen, page.yPositionOnScreen, page.width, page.height));
+            }
+            // menus draw tabs/buttons/titles outside their box; pad generously, then clamp to the layout
+            source = new Rectangle(box.X - 160, box.Y - 128, box.Width + 352, box.Height + 256);
+        }
         source = Rectangle.Intersect(source, new Rectangle(0, 0, mainBounds.Width, mainBounds.Height));
         if (source.Width <= 0 || source.Height <= 0)
         {
