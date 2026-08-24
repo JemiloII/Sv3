@@ -222,7 +222,9 @@ public sealed class ModEntry : Mod
         if (menu is GameMenu gameMenu && gameMenu.currentTab < gameMenu.pages.Count)
         {
             IClickableMenu page = gameMenu.pages[gameMenu.currentTab];
-            box = Rectangle.Union(box, new Rectangle(page.xPositionOnScreen, page.yPositionOnScreen, page.width, page.height));
+            box = page is MapPage
+                ? new Rectangle(0, 0, mainBounds.Width, mainBounds.Height) // the 1.6 world map draws far beyond its reported bounds
+                : Rectangle.Union(box, new Rectangle(page.xPositionOnScreen, page.yPositionOnScreen, page.width, page.height));
         }
         // menus draw tabs/buttons/titles outside their box; pad generously, then clamp to the layout
         Rectangle source = new Rectangle(box.X - 160, box.Y - 128, box.Width + 352, box.Height + 256);
