@@ -36,6 +36,7 @@ public sealed class ModEntry : Mod
     private int renderWidth;
     private int renderHeight;
     private int frameCounter;
+    private int telemetryCounter;
     private float dialogueUiScale;
     private bool secondFrameReady;
     private Type? lastLoggedMenuType;
@@ -276,6 +277,12 @@ public sealed class ModEntry : Mod
         {
             return;
         }
+        if (++telemetryCounter % 18000 == 0) // ~every 5 minutes at 60fps
+        {
+            long managedMb = GC.GetTotalMemory(false) / (1024 * 1024);
+            long processMb = System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / (1024 * 1024);
+            Monitor.Log($"memory check: managed {managedMb} MB, process {processMb} MB, uiTarget {uiTarget.Width}x{uiTarget.Height}", LogLevel.Trace);
+        }
         Game1 game = Game1.game1;
         GraphicsDevice device = Game1.graphics.GraphicsDevice;
         xTile.Dimensions.Rectangle oldViewport = Game1.viewport;
@@ -288,11 +295,10 @@ public sealed class ModEntry : Mod
         RenderTarget2D? oldLightmap = (RenderTarget2D?)LightmapField.GetValue(null);
         RenderTarget2D? oldUiScreen = (RenderTarget2D?)UiScreenField.GetValue(game);
         Viewport oldDevice = device.Viewport;
-        // dialogue and the end-of-night screens lay themselves out from uiViewport via gameWindowSizeChanged,
-        // so they can render natively portrait: re-layout for our viewport, draw normally, re-layout back.
-        // everything else keeps its main-window layout and goes through the crop-and-enlarge menu pass.
-        IClickableMenu? activeMenu = Game1.activeClickableMenu;
-        IClickableMenu? dialogue = activeMenu is DialogueBox or ShippingMenu or LevelUpMenu or SaveGameMenu ? activeMenu : null;
+        // dialogue boxes cache their centered position from uiViewport, so re-center them for our viewport and back.
+        // ONLY DialogueBox: re-laying-out stateful menus (e.g. ShippingMenu) twice a frame resets their internal
+        // state and broke the end-of-night continue button. Everything else uses the crop-and-enlarge pass.
+        IClickableMenu? dialogue = Game1.activeClickableMenu is DialogueBox box ? box : null;
         // drawing HUD menus for our viewport moves their stored click positions; input runs before the
         // main draw restores them next tick, so snapshot the toolbar dock and put everything back after
         Toolbar? toolbar = null;
