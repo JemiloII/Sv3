@@ -234,6 +234,11 @@ public sealed class ModEntry : Mod
                 IClickableMenu page = tabbed.pages[tabbed.currentTab];
                 box = Rectangle.Union(box, new Rectangle(page.xPositionOnScreen, page.yPositionOnScreen, page.width, page.height));
             }
+            if (menu is ShopMenu shop && shop.inventory != null)
+            {
+                // the player-inventory panel sits outside the shop's reported bounds
+                box = Rectangle.Union(box, new Rectangle(shop.inventory.xPositionOnScreen, shop.inventory.yPositionOnScreen, shop.inventory.width, shop.inventory.height));
+            }
             // menus draw tabs/buttons/titles outside their box; pad generously, then clamp to the layout
             source = new Rectangle(box.X - 160, box.Y - 128, box.Width + 352, box.Height + 256);
         }
@@ -283,8 +288,11 @@ public sealed class ModEntry : Mod
         RenderTarget2D? oldLightmap = (RenderTarget2D?)LightmapField.GetValue(null);
         RenderTarget2D? oldUiScreen = (RenderTarget2D?)UiScreenField.GetValue(game);
         Viewport oldDevice = device.Viewport;
-        // dialogue boxes cache their centered position from uiViewport, so re-center them for our viewport and back
-        DialogueBox? dialogue = Game1.activeClickableMenu as DialogueBox;
+        // dialogue and the end-of-night screens lay themselves out from uiViewport via gameWindowSizeChanged,
+        // so they can render natively portrait: re-layout for our viewport, draw normally, re-layout back.
+        // everything else keeps its main-window layout and goes through the crop-and-enlarge menu pass.
+        IClickableMenu? activeMenu = Game1.activeClickableMenu;
+        IClickableMenu? dialogue = activeMenu is DialogueBox or ShippingMenu or LevelUpMenu or SaveGameMenu ? activeMenu : null;
         // drawing HUD menus for our viewport moves their stored click positions; input runs before the
         // main draw restores them next tick, so snapshot the toolbar dock and put everything back after
         Toolbar? toolbar = null;
