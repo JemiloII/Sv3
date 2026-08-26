@@ -235,13 +235,20 @@ public sealed class ModEntry : Mod
                 IClickableMenu page = tabbed.pages[tabbed.currentTab];
                 box = Rectangle.Union(box, new Rectangle(page.xPositionOnScreen, page.yPositionOnScreen, page.width, page.height));
             }
-            if (menu is ShopMenu shop && shop.inventory != null)
+            if (menu is ShopMenu shop)
             {
-                // the player-inventory panel sits outside the shop's reported bounds
-                box = Rectangle.Union(box, new Rectangle(shop.inventory.xPositionOnScreen, shop.inventory.yPositionOnScreen, shop.inventory.width, shop.inventory.height));
+                // the player-inventory panel and NPC portrait/greeting sit outside the shop's reported bounds
+                if (shop.inventory != null)
+                {
+                    box = Rectangle.Union(box, new Rectangle(shop.inventory.xPositionOnScreen, shop.inventory.yPositionOnScreen, shop.inventory.width, shop.inventory.height));
+                }
+                box = Rectangle.Union(box, new Rectangle(menu.xPositionOnScreen - 448, menu.yPositionOnScreen, 448, menu.height));
             }
-            // menus draw tabs/buttons/titles outside their box; pad generously, then clamp to the layout
-            source = new Rectangle(box.X - 160, box.Y - 128, box.Width + 352, box.Height + 256);
+            // menus draw tabs/buttons/titles outside their box; pad generously, then clamp to the layout.
+            // menus that report no real bounds (e.g. SaveGameMenu's 0x0) draw from the live viewport: show everything
+            source = box.Width < 64 || box.Height < 64
+                ? new Rectangle(0, 0, mainBounds.Width, mainBounds.Height)
+                : new Rectangle(box.X - 160, box.Y - 128, box.Width + 352, box.Height + 256);
         }
         source = Rectangle.Intersect(source, new Rectangle(0, 0, mainBounds.Width, mainBounds.Height));
         if (source.Width <= 0 || source.Height <= 0)
@@ -296,9 +303,11 @@ public sealed class ModEntry : Mod
         RenderTarget2D? oldUiScreen = (RenderTarget2D?)UiScreenField.GetValue(game);
         Viewport oldDevice = device.Viewport;
         // dialogue boxes cache their centered position from uiViewport, so re-center them for our viewport and back.
-        // ONLY DialogueBox: re-laying-out stateful menus (e.g. ShippingMenu) twice a frame resets their internal
-        // state and broke the end-of-night continue button. Everything else uses the crop-and-enlarge pass.
-        IClickableMenu? dialogue = Game1.activeClickableMenu is DialogueBox box ? box : null;
+        // ShippingMenu gets RepositionItems() only — its gameWindowSizeChanged calls initialize() and resets
+        // state (broke the end-of-night OK button); RepositionItems is pure geometry and safe per-frame.
+        // Everything else uses the crop-and-enlarge pass.
+        IClickableMenu? dialogue = Game1.activeClickableMenu is DialogueBox dlg ? dlg : null;
+        ShippingMenu? shipping = Game1.activeClickableMenu as ShippingMenu;
         // drawing HUD menus for our viewport moves their stored click positions; input runs before the
         // main draw restores them next tick, so snapshot the toolbar dock and put everything back after
         Toolbar? toolbar = null;
@@ -315,9 +324,9 @@ public sealed class ModEntry : Mod
         Rectangle mainBounds = new Rectangle(oldUiViewport.X, oldUiViewport.Y, oldUiViewport.Width, oldUiViewport.Height);
         // HUD always renders at the configured scale so it never moves when a menu opens;
         // non-dialogue menus get their own pass at main-window layout, composited enlarged
-        float uiScale = dialogue != null ? dialogueUiScale : config.UiScale;
+        float uiScale = dialogue != null || shipping != null ? dialogueUiScale : config.UiScale;
         IClickableMenu? openMenu = Game1.activeClickableMenu;
-        suppressMenuDraw = openMenu != null && dialogue == null;
+        suppressMenuDraw = openMenu != null && dialogue == null && shipping == null;
         effectiveUiWidth = (int)Math.Ceiling(renderWidth / uiScale);
         effectiveUiHeight = (int)Math.Ceiling(renderHeight / uiScale);
         EnsureUiTargetSize(
@@ -366,6 +375,11 @@ public sealed class ModEntry : Mod
             {
                 Game1.uiViewport = new xTile.Dimensions.Rectangle(0, 0, effectiveUiWidth, effectiveUiHeight);
                 dialogue.gameWindowSizeChanged(mainBounds, secondBounds);
+            }
+            else if (shipping != null)
+            {
+                Game1.uiViewport = new xTile.Dimensions.Rectangle(0, 0, effectiveUiWidth, effectiveUiHeight);
+                shipping.RepositionItems();
             }
 
             DrawMethod.Invoke(game, new object[] { gameTime, target });
@@ -417,6 +431,7 @@ public sealed class ModEntry : Mod
             Game1.viewport = oldViewport;
             device.Viewport = oldDevice;
             dialogue?.gameWindowSizeChanged(secondBounds, mainBounds);
+            shipping?.RepositionItems();
             if (toolbar != null)
             {
                 toolbar.yPositionOnScreen = toolbarY;
