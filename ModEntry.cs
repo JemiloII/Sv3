@@ -19,6 +19,7 @@ public sealed class ModEntry : Mod
     private static readonly FieldInfo UiScreenField = AccessTools.Field(typeof(Game1), "_uiScreen");
     private static readonly FieldInfo GlTextureField = AccessTools.Field(typeof(Texture), "glTexture");
     private static readonly MethodInfo DayTimeUpdatePosition = AccessTools.Method(typeof(DayTimeMoneyBox), "updatePosition");
+    private static readonly FieldInfo DayPlaqueYField = AccessTools.Field(typeof(ShippingMenu), "dayPlaqueY");
 
     // state shared with the HUD-lift patches while the second view is drawing
     private static bool renderingSecond;
@@ -308,6 +309,7 @@ public sealed class ModEntry : Mod
         // Everything else uses the crop-and-enlarge pass.
         IClickableMenu? dialogue = Game1.activeClickableMenu is DialogueBox dlg ? dlg : null;
         ShippingMenu? shipping = Game1.activeClickableMenu as ShippingMenu;
+        int shippingPlaqueY = 0;
         // drawing HUD menus for our viewport moves their stored click positions; input runs before the
         // main draw restores them next tick, so snapshot the toolbar dock and put everything back after
         Toolbar? toolbar = null;
@@ -378,8 +380,12 @@ public sealed class ModEntry : Mod
             }
             else if (shipping != null)
             {
+                // RepositionItems resets dayPlaqueY, which the outro ANIMATES to drive the save/new-day
+                // transition — resetting it every frame stalls the night forever. Preserve it.
+                shippingPlaqueY = (int)DayPlaqueYField.GetValue(shipping)!;
                 Game1.uiViewport = new xTile.Dimensions.Rectangle(0, 0, effectiveUiWidth, effectiveUiHeight);
                 shipping.RepositionItems();
+                DayPlaqueYField.SetValue(shipping, shippingPlaqueY);
             }
 
             DrawMethod.Invoke(game, new object[] { gameTime, target });
@@ -431,7 +437,11 @@ public sealed class ModEntry : Mod
             Game1.viewport = oldViewport;
             device.Viewport = oldDevice;
             dialogue?.gameWindowSizeChanged(secondBounds, mainBounds);
-            shipping?.RepositionItems();
+            if (shipping != null)
+            {
+                shipping.RepositionItems();
+                DayPlaqueYField.SetValue(shipping, shippingPlaqueY);
+            }
             if (toolbar != null)
             {
                 toolbar.yPositionOnScreen = toolbarY;
