@@ -328,7 +328,9 @@ public sealed class ModEntry : Mod
         // non-dialogue menus get their own pass at main-window layout, composited enlarged
         float uiScale = dialogue != null || shipping != null ? dialogueUiScale : config.UiScale;
         IClickableMenu? openMenu = Game1.activeClickableMenu;
-        suppressMenuDraw = openMenu != null && dialogue == null && shipping == null;
+        // BobberBar (fishing) draws in world space next to the player — it must render in the normal
+        // pass with the world visible, never through the fade-and-crop menu pass
+        suppressMenuDraw = openMenu != null && dialogue == null && shipping == null && openMenu is not BobberBar;
         effectiveUiWidth = (int)Math.Ceiling(renderWidth / uiScale);
         effectiveUiHeight = (int)Math.Ceiling(renderHeight / uiScale);
         EnsureUiTargetSize(
