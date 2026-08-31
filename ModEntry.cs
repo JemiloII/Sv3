@@ -346,7 +346,13 @@ public sealed class ModEntry : Mod
         Rectangle secondBounds = new Rectangle(0, 0, effectiveUiWidth, effectiveUiHeight);
         try
         {
-            Point center = Game1.player.StandingPixel;
+            // during events/cutscenes the game drives the camera (pans, follows NPCs, stages scenes away
+            // from the player) — follow the MAIN camera's center then, not the player, or the mirror
+            // films an empty corner of the map while the cutscene happens elsewhere
+            bool eventActive = Game1.eventUp || Game1.CurrentEvent != null || Game1.farmEvent != null;
+            Point center = eventActive
+                ? new Point(oldViewport.X + oldViewport.Width / 2, oldViewport.Y + oldViewport.Height / 2)
+                : Game1.player.StandingPixel;
             int mapWidth = Game1.currentLocation.map.Layers[0].LayerWidth * 64;
             int mapHeight = Game1.currentLocation.map.Layers[0].LayerHeight * 64;
             // clamp to the map edge like the main camera; center small maps
