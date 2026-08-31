@@ -1,7 +1,7 @@
 {
   "Name": "Vertical View",
   "Author": "JemiloII",
-  "Version": "0.2.1",
+  "Version": "0.2.2",
   "Description": "Renders a vertical camera view of the player into a separate window, for portrait stream capture.",
   "UniqueID": "JemiloII.VerticalView",
   "EntryDll": "VerticalView.dll",
