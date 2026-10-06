@@ -41,3 +41,7 @@ Edit the config and restart the game — no rebuild needed.
 ## OBS
 
 Capture the window `Stardew Valley Vertical View` with Window Capture. The window can be ignored/minimized-behind — it keeps rendering.
+
+## USE
+
+Just link to my twitch [https://twitch.tv/ShibikoX](https://twitch.tv/ShibikoX) as the creator of the Sv3 Plugin in the Description somewhere of the video/live stream and its free to use.
